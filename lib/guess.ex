@@ -12,13 +12,54 @@ defmodule Guess do
     IO.gets("Pick a difficult level (1, 2 or 3):")
     |> parse_input()
     |> pickup_number()
-    |> IO.inspect()
+    |> play
+  end
+
+  def play(picked_num) do
+    IO.gets("I have my number. What is your guess?")
+    |> parse_input()
+    |> guess(picked_num, 1)
+  end
+
+  def guess(usr_guess, picked_num, count) when usr_guess > picked_num do
+    IO.getn("Too high. Guess again: ")
+    |> parse_input()
+    |> guess(picked_num, count + 1)
+  end
+
+  def guess(usr_guess, picked_num, count) when usr_guess < picked_num do
+    IO.getn("Too low. Guess again: ")
+    |> parse_input()
+    |> guess(picked_num, count + 1)
+  end
+
+  def guess(_usr_guess, _picked_num, count) do
+    IO.puts("You got it #{count} guess!")
+    show_score(count)
   end
 
   def pickup_number(level) do
     level
     |> get_range()
     |> Enum.random()
+  end
+
+  def show_score(guesses) when guesses > 6 do
+    IO.puts("Better luck next time")
+  end
+
+  def show_score(guesses) do
+    {_, msg} =
+      %{
+        (1..1) => "You're a mind rider!",
+        (2..4) => "Most impressive!",
+        (5..6) => "You can do better than that"
+      }
+      |> Enum.find(fn {range, _} ->
+        Enum.member?(range, guesses)
+      end)
+
+    IO.puts(msg)
   end
 
   def parse_input(:error) do
